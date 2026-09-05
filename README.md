@@ -1,6 +1,6 @@
-# Social Media Content Automation Pipeline
+# Social Media Content Migration Tool
 
-End-to-end content operations system that identifies trending TikTok videos by niche, curates them, and automates distribution across YouTube, Instagram, and TikTok with scheduled posting and duplicate prevention.
+A cross-platform automation tool for content creators to migrate their TikTok videos to YouTube, Instagram, and TikTok.
 
 ## Demo
 
@@ -18,112 +18,130 @@ End-to-end content operations system that identifies trending TikTok videos by n
 
 ## Components
 
-### 1. TikTok Scraper (`scraper/tiktok_scraper.py`)
-- Searches TikTok by niche/keyword using `undetected-chromedriver`
-- Extracts video metadata: views, engagement, hashtags, creator
-- Downloads top-performing videos via ssstik.io API integration
-- Handles dynamic JavaScript rendering and anti-bot measures
-- Filters by minimum view threshold (e.g., >1M views)
+### 1. TikTok Scraper (`tiktok_scraper.py`)
+- Searches TikTok by keyword using `undetected-chromedriver`.
+- Extracts video links using BeautifulSoup.
+- Downloads videos using `yt-dlp` with anti-bot evasion (sleep intervals, impersonation).
+- Handles dynamic JavaScript rendering and anti-bot measures.
 
-### 2. Content Curator (`utils/helpers.py`)
-- Randomized index-based selection prevents duplicate uploads
-- Emoji removal and title sanitization for cross-platform compatibility
-- Filename cleaning to prevent filesystem errors
-- State tracking across multiple accounts and niches
+### 2. Scheduler (`scheduler.py`)
+- Cron-like scheduling with the `schedule` library.
+- Optimized posting times per platform (morning, afternoon, evening).
+- Multi-account management via separate Chrome profiles.
+- Automated index tracking prevents duplicate uploads.
 
-### 3. Multi-Platform Uploader
-- **YouTube** (`uploader/youtube_uploader.py`): Automated upload with title, visibility settings, and publication workflow
-- **TikTok** (`uploader/tiktok_uploader.py`): iframe handling, caption input, and publication via web interface
-- **Instagram** (`uploader/instagram_uploader.py`): Reel upload with caption automation
+### 3. Multi-Platform Uploaders
+- **YouTube** (`youtube_uploader.py`): Automated upload with title, visibility settings, and publication workflow.
+- **Instagram** (`instagram_uploader.py`): Reel upload with caption automation.
+- **TikTok** (`tiktok_uploader.py`): Iframe handling, caption input, and publication via web interface.
 
-### 4. Scheduler (`scheduler/scheduler.py`)
-- Cron-like scheduling with `schedule` library
-- Optimized posting times per platform (morning, afternoon, evening)
-- Multi-account parallel management via Chrome profile separation
-- Automated index tracking to prevent reposts
+### 4. Direct Migration (`migrate_all.py`)
+- Uploads all videos in a folder to a specific platform immediately.
+- No scheduling required—instant content migration.
 
 ## Tech Stack
+
 - **Python** — core language
 - **Selenium + undetected-chromedriver** — browser automation with anti-detection
-- **BeautifulSoup** — HTML parsing and metadata extraction
-- **requests** — API integration (ssstik.io download endpoint)
-- **pynput** — keyboard automation for file dialogs
-- **schedule** — task automation and timing
+- **BeautifulSoup** — HTML parsing
+- **yt-dlp** — video downloading
+- **schedule** — task scheduling
 
 ## Setup
 
 ### 1. Install Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 2. Configure Paths
+Copy config_template.py to config.py and fill in your local paths:
+
 ```bash
-cp config/config.example.py config/config.py
+cp config_template.py config.py
 ```
-Edit `config/config.py` with your local paths:
-- Chrome user data directory
-- Content directories for each niche
-- Chrome profile numbers for each account
-- Chromedriver path (optional)
+
+Edit config.py with:
+
+Chrome binary path.
+
+Chrome user data directory.
+
+Content directories (cat_videos, dog_videos).
+
+Chrome profile numbers.
 
 ### 3. Prepare Chrome Profiles
-Create separate Chrome profiles for each platform account:
-- YouTube account → Profile 8
-- TikTok Account 1 (Oshi No Ko) → Profile 6
-- TikTok Account 2 (Chainsaw Man) → Profile 7
-- TikTok Account 3 (Demon Slayer) → Profile 9
+Create separate Chrome profiles for each account:
+
+Profile 1: Cat videos (YouTube, Instagram, TikTok).
+
+Profile 2: Dog videos (YouTube, Instagram, TikTok).
 
 ### 4. Scrape Content
 ```bash
-python scraper/tiktok_scraper.py
+python tiktok_scraper.py
 ```
 
-### 5. Start Scheduled Uploads
+### 5. Run Scheduled Uploads
 ```bash
-python scheduler/scheduler.py
+python scheduler.py
+```
+
+### 6. Run Direct Migration
+```bash
+python migrate_all.py
 ```
 
 ## Project Structure
+
 ```
 social-media-content-automation/
-├── config/
-│   ├── config.example.py      # Configuration template
-│   └── config.py              # Your local config (gitignored)
-├── scraper/
-│   └── tiktok_scraper.py      # Trend scraping & download
-├── uploader/
-│   ├── youtube_uploader.py    # YouTube automation
-│   ├── tiktok_uploader.py     # TikTok automation
-│   └── instagram_uploader.py  # Instagram automation
-├── scheduler/
-│   └── scheduler.py           # Orchestration & timing
-├── utils/
-│   └── helpers.py             # Text processing & sanitization
+├── youtube_uploader.py         # YouTube automation
+├── instagram_uploader.py       # Instagram automation
+├── tiktok_uploader.py          # TikTok upload automation
+├── tiktok_scraper.py           # TikTok scraping & downloading
+├── scheduler.py                # Orchestration & timing
+├── migrate_all.py              # Direct migration (no scheduling)
+├── config_template.py          # Configuration template
+├── config.py                   # Your local config (gitignored)
 ├── requirements.txt
 ├── .gitignore
-└── README.md
+├── README.md
+├── cat_videos/                 # Cat video files
+├── dog_videos/                 # Dog video files
+├── chrome/                     # Portable Chrome 126 (gitignored)
+└── chromedriver/               # Portable ChromeDriver (gitignored)
 ```
 
 ## Design Decisions
-
 ### Duplicate Prevention
-Initially considered deleting uploaded videos from the directory. Instead, implemented randomized index lists where the used index is popped via `pop()`. This preserves the original files while ensuring no video is reposted.
-
-### Emoji Handling
-Cross-platform keyboard encoding limitations required removing emojis from titles. Titles remain clear and informative without emoji characters.
+Implemented randomized index lists where the used index is popped via pop(). This preserves the original files while ensuring no video is reposted.
 
 ### Profile-Based Multi-Account
 Each platform account uses a separate Chrome profile, enabling parallel management without manual login switching.
 
-### Randomized Scheduling
-Index lists are pre-shuffled to introduce variety in upload sequences, preventing identical content from being posted simultaneously across platforms.
+### Anti-Bot Evasion
+undetected-chromedriver bypasses bot detection.
 
-## Niches Managed
-- **Oshi No Ko** — Anime content
-- **Chainsaw Man** — Anime content
-- **Demon Slayer** — Anime content
+yt-dlp sleep intervals (sleep_interval, max_sleep_interval) prevent rate limiting.
 
+cookiefile support for logged-in sessions.
+
+### Direct Migration
+Added migrate_all() for immediate uploads without waiting for scheduled times.
+
+### Niches Managed
+Cat videos
+
+Dog videos
+
+## Disclaimer
+This project was built for educational purposes and personal content management. Respect platform Terms of Service and content creator rights.
+
+## License
+MIT License
 ## Disclaimer
 This project was built as a final project for Harvard CS50. It is designed for educational purposes and personal content management. Respect platform Terms of Service and content creator rights.
 
