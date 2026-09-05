@@ -31,7 +31,7 @@ def upload_to_tiktok(profile, file_dir, index_list, name, chromedriver_path=""):
 
     options.binary_location = CHROME_BINARY
     options.add_argument(f"--profile-directory=Profile {profile}")
-    options.add_argument("--user-data-dir=C:\\Users\\Ilyas\\AppData\\Local\\Google\\Chrome for Testing\\User Data")
+    options.add_argument("--user-data-dir={CHROME_USER_DATA_DIR}")
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
