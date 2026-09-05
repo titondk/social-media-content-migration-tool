@@ -66,7 +66,7 @@ def scrape_tiktok(profile):
     )
 
     try:
-        driver.get("https://www.tiktok.com/search?q=Cat%20Video&t=1788414713803")
+        driver.get("https://www.tiktok.com/@oshinoko024")
         #Scroling part 
         #used send keys method because the javascript injection method doesnt work no more 
         body = driver.find_element(By.TAG_NAME, 'body')
