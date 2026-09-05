@@ -109,8 +109,8 @@ social-media-content-automation/
 ├── requirements.txt
 ├── .gitignore
 ├── README.md
-├── cat_videos/                 # Cat video files
-├── dog_videos/                 # Dog video files
+├── cat_videos/                 # Cat video files (gitignored)
+├── dog_videos/                 # Dog video files (gitignored)
 ├── chrome/                     # Portable Chrome 126 (gitignored)
 └── chromedriver/               # Portable ChromeDriver (gitignored)
 ```
@@ -139,11 +139,6 @@ Dog videos
 
 ## Disclaimer
 This project was built for educational purposes and personal content management. Respect platform Terms of Service and content creator rights.
-
-## License
-MIT License
-## Disclaimer
-This project was built as a final project for Harvard CS50. It is designed for educational purposes and personal content management. Respect platform Terms of Service and content creator rights.
 
 ## License
 MIT License
